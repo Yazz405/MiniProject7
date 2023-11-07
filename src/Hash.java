@@ -74,4 +74,8 @@ public class Hash {
 
       return Arrays.equals(hash, otherHash.hash);
   } // equals(Object other)
+
+public boolean startsWith(String string) {
+    return false;
+}
 } // class Hash
