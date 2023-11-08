@@ -30,9 +30,6 @@ public class Hash {
    * the given hash (as an array of bytes).
    */
   public Hash(byte[] data) {
-    //   if (data.length != 3) {
-    //       throw new IllegalArgumentException("Hash must contain exactly 3 bytes");
-    //   }
       this.hash = data;
   } // Hash(byte[] data)
 
@@ -47,7 +44,7 @@ public class Hash {
    * Returns true if hash meets the criteria for validity.
    */
   public boolean isValid() {
-      return hash[0] == 0;
+      return hash[0] == 0 && hash[1] == 0 && hash[2] == 0;
   } // isValid()
 
   /**
@@ -55,7 +52,11 @@ public class Hash {
    * a string of hexadecimal digits, 2 digits per byte.
    */
   public String toString() {
-      return String.format("%02X%02X%02X", Byte.toUnsignedInt(hash[0]), Byte.toUnsignedInt(hash[1]), Byte.toUnsignedInt(hash[2]));
+    String result = "";
+    for(int i = 0; i < this.hash.length; i++){
+        result += String.format("%02X", this.hash[i]);
+    }
+      return result;
   } // toString()
 
   /**

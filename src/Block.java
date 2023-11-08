@@ -64,7 +64,7 @@ public class Block {
       this.amount = amount;
       this.prev = prevHash;
       this.nonce = nonce;
-      calculateHash();
+      this.current = calculateHash(this.index, this.amount, this.prev, this.nonce);
   }
 
   // +----------------+----------------------------------------------
@@ -118,62 +118,37 @@ public class Block {
    * nonce that results in a hash with a specific pattern.
    */
   private void mineBlock() throws NoSuchAlgorithmException {
-    MessageDigest md = MessageDigest.getInstance("SHA-256");
-    ByteBuffer buffer = ByteBuffer.allocate(16); // 4 bytes for index, 4 bytes for amount, and 8 bytes for nonce
     Random rand = new Random();
 
-    this.nonce = rand.nextLong();
 
     while (true) {
-      buffer.clear();
-      buffer.putInt(this.index);
-      buffer.putInt(this.amount);
-      buffer.putLong(this.nonce);
+        this.nonce = rand.nextLong();
+        Hash test = calculateHash(this.index, this.amount, this.prev, this.nonce);
 
-      byte[] input = buffer.array();
-      md.update(input);
-
-      byte[] hashBytes = md.digest();
-
-      if (isHashValid(hashBytes)) {
-        this.current = new Hash(hashBytes);
+      if (test.isValid()) {
+        this.current = test;
         break;
-      }
+      }//if
+    }//while
+  }// mineBlock() 
 
-      this.nonce = rand.nextLong();
+  /*
+   * calculates hash
+   */
+  public Hash calculateHash(Integer index, Integer amount, Hash prevHash,Long nonce) throws NoSuchAlgorithmException{
+    MessageDigest md = MessageDigest.getInstance("SHA-256");
+    ByteBuffer buffer = ByteBuffer.allocate(16);// 4 bytes for index, 4 bytes for amount, and 8 bytes for nonce
+    buffer.putInt(this.index);
+    buffer.putInt(this.amount);
+    if(prevHash != null){
+        buffer.put(prevHash.getData());
     }
-  } // toString
+    buffer.putLong(this.nonce);
+    byte[] input = buffer.array();
+    md.update(input);
 
-  /*
-   * Calculates the hash of the current block without mining.
-   */
-  private void calculateHash() throws NoSuchAlgorithmException {
-      MessageDigest md = MessageDigest.getInstance("SHA-256");
-      ByteBuffer buffer = ByteBuffer.allocate(16); // 4 bytes for index, 4 bytes for amount, and 8 bytes for nonce
-
-      buffer.putInt(this.index);
-      buffer.putInt(this.amount);
-      buffer.putLong(this.nonce);
-
-      byte[] input = buffer.array();
-      md.update(input);
-
-      byte[] hashBytes = md.digest();
-      this.current = new Hash(hashBytes);
-  } // calculateHash
-
-
-  /*
-   * Checks whether a given hash is valid.
-   */
-  private boolean isHashValid(byte[] hash) {
-      for (int i = 0; i < 4; i++) {
-          if (hash[i] != 0) {
-              return false;
-          }
-      }
-      return true;
-  } // isHashValid
+    return new Hash(md.digest());
+  }// calculateHash()
 
   public static void main(String[] args) throws NoSuchAlgorithmException{
      PrintWriter pen = new PrintWriter(System.out, true);
