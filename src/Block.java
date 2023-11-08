@@ -1,6 +1,8 @@
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.io.PrintWriter;
 import java.nio.ByteBuffer;
+import java.util.Random;
 
 /**
  * An implementation of a block with all the necessary information.
@@ -116,27 +118,30 @@ public class Block {
    * nonce that results in a hash with a specific pattern.
    */
   private void mineBlock() throws NoSuchAlgorithmException {
-      MessageDigest md = MessageDigest.getInstance("SHA-256");
-      ByteBuffer buffer = ByteBuffer.allocate(16); // 4 bytes for index, 4 bytes for amount, and 8 bytes for nonce
+    MessageDigest md = MessageDigest.getInstance("SHA-256");
+    ByteBuffer buffer = ByteBuffer.allocate(16); // 4 bytes for index, 4 bytes for amount, and 8 bytes for nonce
+    Random rand = new Random();
 
-      while (true) {
-          buffer.clear();
-          buffer.putInt(this.index);
-          buffer.putInt(this.amount);
-          buffer.putLong(this.nonce);
+    this.nonce = rand.nextLong();
 
-          byte[] input = buffer.array();
-          md.update(input);
+    while (true) {
+      buffer.clear();
+      buffer.putInt(this.index);
+      buffer.putInt(this.amount);
+      buffer.putLong(this.nonce);
 
-          byte[] hashBytes = md.digest();
+      byte[] input = buffer.array();
+      md.update(input);
 
-          if (isHashValid(hashBytes)) {
-              this.current = new Hash(hashBytes);
-              break;
-          }
+      byte[] hashBytes = md.digest();
 
-          this.nonce++;
+      if (isHashValid(hashBytes)) {
+        this.current = new Hash(hashBytes);
+        break;
       }
+
+      this.nonce = rand.nextLong();
+    }
   } // toString
 
   /*
@@ -169,4 +174,11 @@ public class Block {
       }
       return true;
   } // isHashValid
+
+  public static void main(String[] args) throws NoSuchAlgorithmException{
+     PrintWriter pen = new PrintWriter(System.out, true);
+     Block blk = new Block(0, 300, null);
+     pen.println(blk.toString());
+  }
+  
 } // class Block

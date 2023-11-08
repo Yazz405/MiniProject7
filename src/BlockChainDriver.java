@@ -11,11 +11,20 @@ public class BlockChainDriver {
     PrintWriter pen = new PrintWriter(System.out, true);
     Scanner input = new Scanner(System.in);
 
-    String exp;
+    String exp = input.nextLine();
+    BlockChain blkChain = new BlockChain(Integer.parseInt(args[0]));
+    pen.println(blkChain.toString());
+    pen.println("here");
+    
     while(true){
+      pen.println("Command?");
       exp = input.nextLine();
 
       if(exp.equals("mine")){
+        pen.println("Amount Transferred?");
+        exp = input.nextLine();
+        blkChain.mine(Integer.parseInt(exp));
+        blkChain.toString();
 
       }else if(exp.equals("append")){
 
@@ -40,5 +49,6 @@ public class BlockChainDriver {
       }// else if 
     }// while
 
+    input.close();
   }// main
 }// class BlockChainDriver
