@@ -113,21 +113,20 @@ public class BlockChain {
    * Walks the blockchain and ensures that its blocks are consistent and valid
    */
   public boolean isValidBlockChain() {
-    Node current = first;
-    Block prevBlock = null;
+    Node current = this.first;
+    int alexisBalance = 0;
+    int blakeBalance = this.first.getBlock().getAmount();
 
     while (current != null) {
       Block block = current.getBlock();
 
-      if (prevBlock != null && !prevBlock.getHash().equals(block.getPrevHash())) {
-        return false;
-      }
+      blakeBalance -= block.getAmount();
+      alexisBalance += block.getAmount();
 
-      prevBlock = block;
       current = current.next;
     }
 
-    return true;
+    return !(alexisBalance < 0 || blakeBalance < 0);
   }
 
   /**
@@ -135,17 +134,15 @@ public class BlockChain {
    */
   public void printBalances() {
     int alexisBalance = 0;
-    int blakeBalance = 0;
+    int blakeBalance = this.first.getBlock().getAmount();
 
     Node current = first;
     while (current != null) {
       Block block = current.getBlock();
-      if (block.getAmount() > 0) {
-        alexisBalance += block.getAmount();
-      } else {
-        blakeBalance -= block.getAmount();
-        alexisBalance += block.getAmount();
-      }
+
+      blakeBalance -= block.getAmount();
+      alexisBalance += block.getAmount();
+
       current = current.next;
     }
 
