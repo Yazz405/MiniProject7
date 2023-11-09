@@ -1,54 +1,118 @@
-import java.io.PrintWriter;
 import java.util.Scanner;
 
-/*
+/**
+ * An implementation of BlockChainDriver, which allows users to interact with 
+ * a blockchain by providing a command-line interface for managing and monitoring 
+ * blockchain operations.
+ * 
  * @author Alma Ordaz
  * @author Madel Sibal
+ * 
+ * Documentation from the reading "Mini-Project 7: Blockchains"
  */
 public class BlockChainDriver {
-  
-  public static void main(String[] args){
-    PrintWriter pen = new PrintWriter(System.out, true);
-    Scanner input = new Scanner(System.in);
+    /**
+     * Processes command-line arguments, initializes the blockchain, 
+     * and provides an interactive menu for users to manage the blockchain.
+     */
+    public static void main(String[] args) {
+        if (args.length != 1) {
+            System.out.println("Usage: java BlockChainDriver <initial_amount>");
+            System.exit(1);
+        }
 
-    String exp = input.nextLine();
-    BlockChain blkChain = new BlockChain(Integer.parseInt(args[0]));
-    pen.println(blkChain.toString());
-    pen.println("here");
-    
-    while(true){
-      pen.println("Command?");
-      exp = input.nextLine();
+        int initialAmount = Integer.parseInt(args[0]);
+        BlockChain blockchain = new BlockChain(initialAmount);
 
-      if(exp.equals("mine")){
-        pen.println("Amount Transferred?");
-        exp = input.nextLine();
-        blkChain.mine(Integer.parseInt(exp));
-        blkChain.toString();
+        Scanner scanner = new Scanner(System.in);
 
-      }else if(exp.equals("append")){
+        while (true) {
+            System.out.println("Blockchain Commands:");
+            System.out.println("mine - Discover nonce for a transaction");
+            System.out.println("append - Append a new block");
+            System.out.println("remove - Remove the last block");
+            System.out.println("check - Check if the blockchain is valid");
+            System.out.println("report - Report balances of Alexis and Blake");
+            System.out.println("help - Print this list of commands");
+            System.out.println("quit - Quit the program");
 
-      }else if(exp.equals("remove")){
+            System.out.print("Enter a command: ");
+            String command = scanner.nextLine();
 
-      }else if(exp.equals("check")){
+            switch (command) {
+                case "mine":
+                    mineBlock(blockchain, scanner);
+                    break;
+                case "append":
+                    appendBlock(blockchain, scanner);
+                    break;
+                case "remove":
+                    removeLastBlock(blockchain);
+                    break;
+                case "check":
+                    checkBlockchain(blockchain);
+                    break;
+                case "report":
+                    reportBalances(blockchain);
+                    break;
+                case "help":
+                    printHelp();
+                    break;
+                case "quit":
+                    scanner.close();
+                    System.exit(0);
+                default:
+                    System.out.println("Invalid command. Type 'help' for a list of commands.");
+            }
 
-      }else if(exp.equals("report")){
+            System.out.println("\nCurrent Blockchain:");
+            System.out.println(blockchain.toString());
+        }
+    }
 
-      }else if(exp.equals("help")){
-        pen.println("Valid commands: \n\tmine: discovers the nonce for a given transaction");
-        pen.println("\tappend: appends a new block onto the end of the chain");
-        pen.println("\tremove: removes the last block from the end of the chain");
-        pen.println("\tcheck: checks that the block chain is valid");
-        pen.println("\treport: reports the balances of Alexis and Blake");
-        pen.println("\thelp: prints this list of commands");
-        pen.println("\tquit: quits the program");
-      }else if(exp.equals("quit")){
-        break;
-      }else {
-        System.err.println("Not a valid command, enter help for a list of commands");
-      }// else if 
-    }// while
+    private static void mineBlock(BlockChain blockchain, Scanner scanner) {
+        System.out.print("Enter transaction amount for mining: ");
+        int amount = scanner.nextInt();
+        scanner.nextLine();
+        blockchain.mine(amount);
+    }
 
-    input.close();
-  }// main
-}// class BlockChainDriver
+    private static void appendBlock(BlockChain blockchain, Scanner scanner) {
+        System.out.print("Enter transaction amount for appending: ");
+        int amount = scanner.nextInt();
+        System.out.print("Enter nonce for appending: ");
+        long nonce = scanner.nextLong();
+        scanner.nextLine(); 
+        Block newBlock = new Block(blockchain.getSize(), amount, blockchain.getHash(), nonce);
+        try {
+            blockchain.append(newBlock);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private static void removeLastBlock(BlockChain blockchain) {
+        if (blockchain.removeLast()) {
+            System.out.println("Last block removed.");
+        } else {
+            System.out.println("Cannot remove the last block. The blockchain only contains a single block.");
+        }
+    }
+
+    private static void checkBlockchain(BlockChain blockchain) {
+        if (blockchain.isValidBlockChain()) {
+            System.out.println("The blockchain is valid.");
+        } else {
+            System.out.println("The blockchain is not valid.");
+        }
+    }
+
+    private static void reportBalances(BlockChain blockchain) {
+        blockchain.printBalances();
+    }
+
+    private static void printHelp() {
+        System.out.println("Valid commands:");
+        System.out.println("mine, append, remove, check, report, help, quit");
+    }
+}

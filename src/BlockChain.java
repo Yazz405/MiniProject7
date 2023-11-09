@@ -1,153 +1,225 @@
-import java.io.PrintWriter;
-import java.security.NoSuchAlgorithmException;
-
-public class BlockChain {
-  // +--------+------------------------------------------------------
-  // | Fields |
-  // +--------+
-
-  /*
-   * The first block in the BlockChain
-   */
-  Node first;
-
-  /*
-   * the most recent block added to the BlockChain
-   */
-  Node last;
-
-  // +--------------+------------------------------------------------
-  // | Constructors |
-  // +--------------+
-
-  /*
-   * creates a BlockChain that possess a single
-   * block the starts with the given initial amount
-   */
-  public BlockChain(int initial) {
-    try{
-    Block blk = new Block(0, initial, null);
-    this.first = new Node(blk, null);
-    this.last = this.first;
-    } catch (Exception e){
-      System.err.println("noSuchAlgorithm");
-    }
-  }// BlockChain(int)
-
-  // +----------------+----------------------------------------------
-  // | Public Methods |
-  // +----------------+
-
-  /*
-   * mines a new candidate block to be added to the end of the chain
-   */
-  public Block mine(int amount){
-    try{
-      Block blk = new Block(this.last.data.getNum() + 1, amount, this.last.data.getHash());
-      return blk;
-    }catch (Exception e){
-      System.err.println("noSuchAlgorithm");
-      return null;
-    }
-
-  }// mine(int)
-
-  /*
-   * returns the size of the blockchain
-   */
-  public int getSize() {
-    return this.last.data.getNum();
-  }// getSize()
-
-  /*
-   * adds this block to the list
-   */
-  public void append(Block blk) throws IllegalArgumentException{
-    this.last.next = new Node(blk, null);
-    this.last = this.last.next;
-  }// append(Block)
-
-  /*
-   * removes the last block from the chain, returning true.
-   * If the chain only contains 1 block, then nothing happens and false is returned
-   */
-  public boolean removeLast(){
-    if(this.last.data.getNum() == 0){
-      return false;
-    } else {
-      //stub
-      return true;
-    }
-  }// removeLast()
-
-  /*
-   * returns the hash of the last block in the chain
-   */
-  public Hash getHash(){
-    return this.last.data.getHash();
-  }// getHash
-
-  /*
-   * walks the blockchain and ensures that its blocks are consistent and valid
-   */
-  public boolean isValidBlockChain(){
-    return false;
-    //stub
-  }// isValidBlockChain
-
-  /*
-   * prints Alexis’s and Blake’s respective balances
-   */
-  public void printBalances(){
-
-  }// printBalances
-
-  /*
-   * returns a string representation of the BlockChain
-   */
-  public String toString(){
-    String result = "";
-    Node chain = this.first;
-    for(int i = 0; i < this.last.data.getNum(); i++){
-      result = chain.data.toString();
-      chain = chain.next;
-    }
-    return result;
-  }// toString()
-
-}// class BlockChain
-
-// +---------------+-----------------------------------------------------
-// | Inner Classes |
-// +---------------+
-
 /**
- * Nodes in the linked list.
+ * An implementation of BlockChain, a singly-linked 
+ * structure with a first and last pointer.
+ * 
+ * @author Alma Ordaz
+ * @author Madel Sibal
+ * 
+ * Documentation from the reading "Mini-Project 7: Blockchains"
  */
-class Node {
-  // +--------+-----------------------------------------------------------
-  // | Fields |
-  // +--------+
+public class BlockChain {
 
-  /**
-   * The data stored in the node.
-   */
-  Block data;
+    // +--------+------------------------------------------------------
+    // | Fields |
+    // +--------+
 
-  /**
-   * The next node in the list. Set to null at the end of the list.
-   */
-  Node next;
+    /**
+     * The first block in the BlockChain
+     */
+    private Node first;
 
-  // +--------------+-----------------------------------------------------
-  // | Constructors |
-  // +--------------+
+    /**
+     * The most recent block added to the BlockChain
+     */
+    private Node last;
 
-  /**
-   * Create a new node with specified data and next.
-   */
-  public Node(Block data, Node next) {
-    this.data = data;
-    this.next = next;
-  } // Node(T, Node)
-} // class Node
+    /**
+     * The number of blocks in the BlockChain
+     */
+    private int size;
+
+    // +--------------+------------------------------------------------
+    // | Constructors |
+    // +--------------+
+
+    /**
+     * Creates a BlockChain that possesses a single block
+     * that starts with the given initial amount
+     */
+    public BlockChain(int initial) {
+        Block initialBlock = new Block(0, initial, null);
+        first = new Node(initialBlock);
+        last = first;
+        size = 1;
+    }
+
+    // +----------------+----------------------------------------------
+    // | Public Methods |
+    // +----------------+
+
+    /**
+     * Mines a new candidate block to be added to the end of the chain
+     */
+    public Block mine(int amount) {
+        if (size == 0) {
+            throw new IllegalStateException("Cannot mine a block without an initial block.");
+        }
+
+        Block prevBlock = last.getBlock();
+        Block newBlock = new Block(size, amount, prevBlock.getHash());
+        last.next = new Node(newBlock);
+        last = last.next;
+        size++;
+
+        return newBlock;
+    }
+
+    /**
+     * Returns the size of the blockchain
+     */
+    public int getSize() {
+        return size;
+    }
+
+    /**
+     * Adds this block to the list
+     */
+    public void append(Block blk) {
+        if (isValidBlock(blk)) {
+            last.next = new Node(blk);
+            last = last.next;
+            size++;
+        } else {
+            throw new IllegalArgumentException("Block cannot be added to the chain because it is invalid.");
+        }
+    }
+
+    /**
+     * Removes the last block from the chain, returning true.
+     * If the chain only contains 1 block, then nothing happens, and false is returned.
+     */
+    public boolean removeLast() {
+        if (size <= 1) {
+            return false;
+        }
+
+        Node current = first;
+        while (current.next != last) {
+            current = current.next;
+        }
+
+        last = current;
+        last.next = null;
+        size--;
+
+        return true;
+    }
+
+    /**
+     * Returns the hash of the last block in the chain
+     */
+    public Hash getHash() {
+        if (size == 0) {
+            return null;
+        }
+        return last.getBlock().getHash();
+    }
+
+    /**
+     * Walks the blockchain and ensures that its blocks are consistent and valid
+     */
+    public boolean isValidBlockChain() {
+        Node current = first;
+        Block prevBlock = null;
+
+        while (current != null) {
+            Block block = current.getBlock();
+
+            if (!isValidBlock(block)) {
+                return false;
+            }
+
+            if (prevBlock != null && !prevBlock.getHash().equals(block.getPrevHash())) {
+                return false;
+            }
+
+            prevBlock = block;
+            current = current.next;
+        }
+
+        return true;
+    }
+
+    /**
+     * Prints Alexis’s and Blake’s respective balances
+     */
+    public void printBalances() {
+        int alexisBalance = 0;
+        int blakeBalance = 0;
+
+        Node current = first;
+        while (current != null) {
+            Block block = current.getBlock();
+            if (block.getAmount() > 0) {
+                alexisBalance += block.getAmount();
+            } else {
+                blakeBalance -= block.getAmount();
+            }
+            current = current.next;
+        }
+
+        System.out.println("Alexis: " + alexisBalance + ", Blake: " + blakeBalance);
+    }
+
+    /**
+     * Returns a string representation of the BlockChain
+     */
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        Node current = first;
+
+        while (current != null) {
+            result.append(current.getBlock()).append("\n");
+            current = current.next;
+        }
+
+        return result.toString();
+    }
+
+    private boolean isValidBlock(Block block) {
+        return true;
+    }
+
+    // +---------------+-----------------------------------------------------
+    // | Inner Classes |
+    // +---------------+
+
+    /**
+     * Nodes in the linked list.
+     */
+    private class Node {
+
+        // +--------+-----------------------------------------------------------
+        // | Fields |
+        // +--------+
+
+        /**
+         * The data stored in the node.
+         */
+        private Block block;
+
+        /**
+         * The next node in the list. Set to null at the end of the list.
+         */
+        private Node next;
+
+        // +--------------+-----------------------------------------------------
+        // | Constructors |
+        // +--------------+
+
+        /**
+         * Create a new node with specified data and next.
+         */
+        Node(Block block) {
+            this.block = block;
+            this.next = null;
+        }
+
+        /**
+         * Retrieves the block contained within this Node.
+         */
+        Block getBlock() {
+            return block;
+        }
+    }
+}

@@ -1,8 +1,6 @@
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.io.PrintWriter;
-import java.nio.ByteBuffer;
-import java.util.Random;
 
 /**
  * An implementation of a block with all the necessary information.
@@ -12,148 +10,169 @@ import java.util.Random;
  * 
  * Documentation from the reading "Mini-Project 7: Blockchains"
  */
-
 public class Block {
 
-  // +--------+------------------------------------------------------
-  // | Fields |
-  // +--------+
+    // +--------+------------------------------------------------------
+    // | Fields |
+    // +--------+
 
- /*
-  * The number of the block in the blockchain
-  */
-  Integer index;
+    /**
+     * The number of the block in the blockchain
+     */
+    private int num;
 
- /*
-  * The amount transferred between the two parties
-  */
-  Integer amount;
+    /**
+     * The amount transferred between the two parties
+     */
+    private int amount;
 
- /*
-  * The hash of the previous block in the chain
-  */
-  Hash prev;
+    /**
+     * The hash of the previous block in the chain
+     */
+    private Hash prevHash;
 
- /*
-  * The nonce
-  */
-  Long nonce;
+    /**
+     * The nonce
+     */
+    private long nonce;
 
- /*
-  * The hash of this block
-  */
-  Hash current;
+    /**
+     * The hash of this block
+     */
+    private Hash hash;
 
- /*
-  * Creates a new block from the specified parameters, 
-  * performing the mining operation to discover the nonce and hash for this block given these parameters
-  */
-  public Block(int num, int amount, Hash prevHash) throws NoSuchAlgorithmException {
-      this.index = num;
-      this.amount = amount;
-      this.prev = prevHash;
-      mineBlock();
-  }
-
- /*
-  * Creates a new block from the specified parameters, 
-  * using the provided nonce and additional parameters to generate the hash for the block
-  */
-  public Block(int num, int amount, Hash prevHash, long nonce) throws NoSuchAlgorithmException {
-      this.index = num;
-      this.amount = amount;
-      this.prev = prevHash;
-      this.nonce = nonce;
-      this.current = calculateHash(this.index, this.amount, this.prev, this.nonce);
-  }
-
-  // +----------------+----------------------------------------------
-  // | Public Methods |
-  // +----------------+
-
-  /*
-   * Returns the number of this block
-   */
-  public int getNum() {
-      return this.index;
-  }
-
-  /*
-   * Returns the amount transferred that is recorded in this block
-   */
-  public int getAmount() {
-      return this.amount;
-  }
-
-  /*
-   * Returns the nonce of this block
-   */
-  public long getNonce() {
-      return this.nonce;
-  }
-
-  /*
-   * Returns the hash of the previous block in the blockchain
-   */
-  public Hash getPrevHash() {
-      return this.prev;
-  }
-
-  /*
-   * Returns the hash of this block
-   */
-  public Hash getHash() {
-      return this.current;
-  }
-
-  /*
-   * Returns a string representation of the block
-   */
-  public String toString() {
-      return "Block " + this.index + " (Amount: " + this.amount + ", Nonce: " + this.nonce + ", prevHash: " + this.prev + ", hash: " + this.current;
-  }
-
-  /*
-   * Mines the current block by finding a valid 
-   * nonce that results in a hash with a specific pattern.
-   */
-  private void mineBlock() throws NoSuchAlgorithmException {
-    Random rand = new Random();
-
-
-    while (true) {
-        this.nonce = rand.nextLong();
-        Hash test = calculateHash(this.index, this.amount, this.prev, this.nonce);
-
-      if (test.isValid()) {
-        this.current = test;
-        break;
-      }//if
-    }//while
-  }// mineBlock() 
-
-  /*
-   * calculates hash
-   */
-  public Hash calculateHash(Integer index, Integer amount, Hash prevHash,Long nonce) throws NoSuchAlgorithmException{
-    MessageDigest md = MessageDigest.getInstance("SHA-256");
-    ByteBuffer buffer = ByteBuffer.allocate(16);// 4 bytes for index, 4 bytes for amount, and 8 bytes for nonce
-    buffer.putInt(this.index);
-    buffer.putInt(this.amount);
-    if(prevHash != null){
-        buffer.put(prevHash.getData());
+    /**
+     * Creates a new block from the specified parameters, performing the mining 
+     * operation to discover the nonce and hash for this block given these parameters
+     */
+    public Block(int num, int amount, Hash prevHash) {
+        this.num = num;
+        this.amount = amount;
+        this.prevHash = prevHash;
+        mineBlock();
     }
-    buffer.putLong(this.nonce);
-    byte[] input = buffer.array();
-    md.update(input);
 
-    return new Hash(md.digest());
-  }// calculateHash()
+    /**
+     * Creates a new block from the specified parameters, 
+     * using the provided nonce and additional parameters to generate the hash for the block
+     */
+    public Block(int num, int amount, Hash prevHash, long nonce) {
+        this.num = num;
+        this.amount = amount;
+        this.prevHash = prevHash;
+        this.nonce = nonce;
+        calculateHash();
+    }
 
-  public static void main(String[] args) throws NoSuchAlgorithmException{
-     PrintWriter pen = new PrintWriter(System.out, true);
-     Block blk = new Block(0, 300, null);
-     pen.println(blk.toString());
-  }
-  
-} // class Block
+    // +----------------+----------------------------------------------
+    // | Public Methods |
+    // +----------------+
+
+    /**
+     * Returns the number of this block
+     */
+    public int getNum() {
+        return num;
+    }
+
+    /**
+     * Returns the amount transferred that is recorded in this block
+     */
+    public int getAmount() {
+        return amount;
+    }
+
+    /**
+     * Returns the nonce of this block
+     */
+    public long getNonce() {
+        return nonce;
+    }
+
+    /**
+     * Returns the hash of the previous block in the blockchain
+     */
+    public Hash getPrevHash() {
+        return prevHash;
+    }
+
+    /**
+     * Returns the hash of this block
+     */
+    public Hash getHash() {
+        return hash;
+    }
+
+    /**
+     * Mines the current block by finding a valid 
+     * nonce that results in a hash with a specific pattern.
+     */
+    private void mineBlock() {
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 is not available.");
+        }
+
+        ByteBuffer buffer = ByteBuffer.allocate(16);
+        buffer.putInt(num);
+        buffer.putInt(amount);
+        if (prevHash != null) {
+            md.update(prevHash.getData());
+        }
+
+        long currentNonce = 0;
+        while (true) {
+            buffer.putLong(currentNonce);
+            byte[] data = buffer.array();
+            md.update(data);
+            byte[] blockHash = md.digest();
+            if (isValidHash(blockHash)) {
+                nonce = currentNonce;
+                hash = new Hash(blockHash);
+                break;
+            }
+            currentNonce++;
+            buffer.clear();
+        }
+    }
+
+    /**
+     * Calculates hash
+     */
+    private void calculateHash() {
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 is not available.");
+        }
+
+        ByteBuffer buffer = ByteBuffer.allocate(16); // For integers and long
+        buffer.putInt(num);
+        buffer.putInt(amount);
+        if (prevHash != null) {
+            md.update(prevHash.getData());
+        }
+        buffer.putLong(nonce);
+        byte[] data = buffer.array();
+        md.update(data);
+        byte[] blockHash = md.digest();
+        hash = new Hash(blockHash);
+    }
+
+    /**
+     * Checks whether a given hash is considered valid
+     */
+    private boolean isValidHash(byte[] hash) {
+        return hash[0] == 0 && hash[1] == 0 && hash[2] == 0;
+    }
+
+    /**
+     * Returns a string representation of the block
+     */
+    public String toString() {
+        return "Block " + num + " (Amount: " + amount + ", Nonce: " + nonce + ", prevHash: " + (prevHash != null ? prevHash.toString() : "null") + ", hash: " + hash.toString() + ")";
+    }
+}
