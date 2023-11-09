@@ -41,7 +41,7 @@ public class BlockChain {
     first = new Node(initialBlock);
     last = first;
     size = 1;
-  }
+  }// BlockChain()
 
   // +----------------+----------------------------------------------
   // | Public Methods |
@@ -59,14 +59,14 @@ public class BlockChain {
     Block newBlock = new Block(size, amount, prevBlock.getHash());
 
     return newBlock;
-  }
+  }// mine()
 
   /**
    * Returns the size of the blockchain
    */
   public int getSize() {
     return size;
-  }
+  }// getSize
 
   /**
    * Adds this block to the list
@@ -75,7 +75,7 @@ public class BlockChain {
     last.next = new Node(blk);
     last = last.next;
     size++;
-  }
+  }// append()
 
   /**
    * Removes the last block from the chain, returning true.
@@ -97,7 +97,7 @@ public class BlockChain {
     size--;
 
     return true;
-  }
+  }// removeLast()
 
   /**
    * Returns the hash of the last block in the chain
@@ -107,7 +107,7 @@ public class BlockChain {
       return null;
     }
     return last.getBlock().getHash();
-  }
+  }// getHash
 
   /**
    * Walks the blockchain and ensures that its blocks are consistent and valid
@@ -127,7 +127,7 @@ public class BlockChain {
     }
 
     return !(alexisBalance < 0 || blakeBalance < 0);
-  }
+  }// isValidBlockChain()
 
   /**
    * Prints Alexis’s and Blake’s respective balances
@@ -147,7 +147,7 @@ public class BlockChain {
     }
 
     System.out.println("Alexis: " + alexisBalance + ", Blake: " + blakeBalance);
-  }
+  }// printBalances()
 
   /**
    * Returns a string representation of the BlockChain
@@ -162,7 +162,7 @@ public class BlockChain {
     }
 
     return result.toString();
-  }
+  }// toString()
 
   // +---------------+-----------------------------------------------------
   // | Inner Classes |
@@ -197,13 +197,14 @@ public class BlockChain {
     Node(Block block) {
       this.block = block;
       this.next = null;
-    }
+    }// Node
 
     /**
      * Retrieves the block contained within this Node.
      */
     Block getBlock() {
       return block;
-    }
+    }// getBlock
   }// class Node
+
 }// class BlockChain

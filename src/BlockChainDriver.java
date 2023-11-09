@@ -61,8 +61,12 @@ public class BlockChainDriver {
       System.out.println("\nCurrent Blockchain:");
       System.out.println(blockchain.toString());
     }
-  }
+  }// main()
 
+  /*
+   * Gets information from the user, and uses that to call the correct method to
+   * mine for a block
+   */
   private static void mineBlock(BlockChain blockchain, Scanner scanner) {
     System.out.print("Enter transaction amount for mining: ");
     int amount = scanner.nextInt();
@@ -71,8 +75,12 @@ public class BlockChainDriver {
     Block blk = blockchain.mine(amount);
 
     System.out.println("Amount: " + blk.getAmount() + ", Nounce: " + blk.getNonce());
-  }
+  }// mineBlock()
 
+  /*
+   * Gets information from the user, and uses that to call the correct method to
+   * append a block to the blockchain
+   */
   private static void appendBlock(BlockChain blockchain, Scanner scanner) {
     System.out.print("Enter transaction amount for appending: ");
     int amount = scanner.nextInt();
@@ -86,27 +94,38 @@ public class BlockChainDriver {
     } catch (IllegalArgumentException e) {
       System.out.println("Error: " + e.getMessage());
     }
-  }
+  }// appendBlock()
 
+  /*
+   * calls the correct method to remove the las block and prints a statement
+   * accordingly
+   */
   private static void removeLastBlock(BlockChain blockchain) {
     if (blockchain.removeLast()) {
       System.out.println("Last block removed.");
     } else {
       System.out.println("Cannot remove the last block. The blockchain only contains a single block.");
     }
-  }
+  }// removeLastBlock()
 
+  /*
+   * Calls the correct method to check the validity of the BlockChain and prints
+   * a statement accordingly
+   */
   private static void checkBlockchain(BlockChain blockchain) {
     if (blockchain.isValidBlockChain()) {
       System.out.println("The blockchain is valid.");
     } else {
       System.out.println("The blockchain is not valid.");
     }
-  }
+  }// checkBlockChain()
 
+  /*
+   * calls the correct method to report the balances to the user
+   */
   private static void reportBalances(BlockChain blockchain) {
     blockchain.printBalances();
-  }
+  }// reportBalances
 
   /*
    * prints a list of commands
@@ -120,5 +139,5 @@ public class BlockChainDriver {
     System.out.println("report - Report balances of Alexis and Blake");
     System.out.println("help - Print this list of commands");
     System.out.println("quit - Quit the program");
-  }
+  }// printHelp()
 }// class BlockChainDriver
