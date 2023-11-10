@@ -118,17 +118,32 @@ public class BlockChain {
    */
   public boolean isValidBlockChain() {
     Node current = this.first;
+    Block prevBlock = null;
     int alexisBalance = 0;
     int blakeBalance = this.first.getBlock().getAmount();
 
+    // testing if the amounts are negative
     while (current != null) {
       Block block = current.getBlock();
 
       blakeBalance -= block.getAmount();
       alexisBalance += block.getAmount();
-
       current = current.next;
-    }
+    } // while
+
+    // testing if the prevHash in the current block is the hash of the previous
+    // block
+    current = this.first;
+    while (current.next != null) {
+      Block block = current.getBlock();
+
+      if (prevBlock != null && !prevBlock.getHash().equals(block.getPrevHash())) {
+        return false;
+      }
+
+      prevBlock = block;
+      current = current.next;
+    } // while
 
     return !(alexisBalance < 0 || blakeBalance < 0);
   }// isValidBlockChain()
