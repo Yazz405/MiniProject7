@@ -71,10 +71,14 @@ public class BlockChain {
   /**
    * Adds this block to the list
    */
-  public void append(Block blk) {
-    last.next = new Node(blk);
-    last = last.next;
-    size++;
+  public void append(Block blk) throws IllegalArgumentException {
+    if (blk.getHash().isValid()) {
+      last.next = new Node(blk);
+      last = last.next;
+      size++;
+    } else {
+      throw new IllegalArgumentException("The Hash ia not valid");
+    }
   }// append()
 
   /**
